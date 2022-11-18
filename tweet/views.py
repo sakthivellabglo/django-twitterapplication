@@ -26,26 +26,19 @@ class UserDetailsView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     pagination_class = LargeResultsSetPagination
 
-class CreateCommentView(generics.CreateAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-
-    def perform_create(self, serializer):
-        parent_id = int(self.request.data['parent'])
-        serializer.save(owner=self.request.user, is_public=True, parent_id=parent_id)
 
 class ListCreateTweetView(generics.ListCreateAPIView):
     queryset = Tweet.objects.all()
     serializer_class = TweetSerializer
 
     def perform_create(self, serializer):
-        print("fdsgdgdgdfgdfrgdfg")
+        print("it's work")
         serializer.save(owner=self.request.user)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         queryset = queryset.filter((Q(owner=request.user) | Q(is_public=True)))
-        print("dgdfshdfgdzf",queryset)
+        print("queryset of list",queryset)
 
         for tweet in queryset:
             tweet_id = tweet.id
@@ -56,6 +49,7 @@ class ListCreateTweetView(generics.ListCreateAPIView):
             tweet.save()
 
         page = self.paginate_queryset(queryset)
+        print("return the iteralble queryset",page)
 
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -89,6 +83,15 @@ class ListPublicTweetsView(generics.ListAPIView):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+class CreateCommentView(generics.CreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+    def perform_create(self, serializer):
+        parent_id = int(self.request.data['parent'])
+        serializer.save(owner=self.request.user, is_public=True, parent_id=parent_id)
+
 class ListUpdateDeleteCommentView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
