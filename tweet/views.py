@@ -70,7 +70,6 @@ class ListPublicTweetsView(generics.ListAPIView):
         for tweet in queryset:
             tweet_id = tweet.id
             likes_count = Like.objects.filter(tweet=tweet_id).count()
-
             tweet.likes_count = likes_count
             tweet.comments_count = tweet.comments.all().count()
             tweet.save()

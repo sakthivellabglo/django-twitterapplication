@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from .models import Tweet, Comment, Like
 
 
-class LikeSerializer(serializers.ModelSerializer):
+class LikeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Like
         fields = ('id', 'author', 'tweet')
@@ -24,9 +24,10 @@ class CommentSerializer(serializers.ModelSerializer):
         return fields
 
 
-class TweetSerializer(serializers.ModelSerializer):
+class TweetSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     comments = CommentSerializer(many=True, read_only=True)
+
 
     class Meta:
         model = Tweet
