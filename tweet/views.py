@@ -1,33 +1,39 @@
-from django.shortcuts import render
+
 from .models import Like, Tweet, Comment
-from rest_framework import generics
 from .serializers import *
-from django.contrib.auth.models import User
 from .serializers import UserSerializer
+
+from rest_framework import generics
 from rest_framework .pagination import PageNumberPagination
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
+
+from django.shortcuts import render
 from django.contrib.auth import authenticate, login
+from django.db.models import Q
+from django.contrib.auth.models import User
 
 
 class LargeResultsSetPagination(PageNumberPagination):
-    page_size = 1
+    page_size = 5
     page_size_query_param = 'page_size'
     max_page_size = 100
+
 
 class Register(viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = CreateuserSerializers
 
+
 class LoginView(generics.GenericAPIView):
     serializer_class = Loginserializer
+
     def post(self, request):
 
         username = request.data.get("username")
@@ -50,15 +56,10 @@ class UserView(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
 
 
-'''class UserDetailsView(generics.RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    pagination_class = LargeResultsSetPagination'''
-
-
 class ListCreateTweetView(viewsets.ModelViewSet):
     queryset = Tweet.objects.all()
     serializer_class = TweetSerializer
+    pagination_class = LargeResultsSetPagination
 
     def perform_create(self, serializer):
         print("it's work")
@@ -97,7 +98,6 @@ class ListPublicTweetsView(viewsets.ModelViewSet):
         print("it's work")
         serializer.save(owner=self.request.user)
 
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         queryset = queryset.filter(is_public=True)
@@ -119,44 +119,10 @@ class ListPublicTweetsView(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-'''
-class PublicTweetsView(generics.ListAPIView):
-    queryset = Tweet.objects.filter(is_public=True)
-    serializer_class = TweetSerializer
-    pagination_class = LargeResultsSetPagination
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        queryset = queryset.filter(is_public=True) 
-
-        for tweet in queryset:
-            tweet_id = tweet.id
-            likes_count = Like.objects.filter(tweet=tweet_id).count()
-            tweet.likes_count = likes_count
-            tweet.comments_count = tweet.comments.all().count()
-            tweet.save()
-
-        page = self.paginate_queryset(queryset)
-
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)'''
-'''
-class CreateCommentView(generics.CreateAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-
-    def perform_create(self, serializer):
-        parent_id = int(self.request.data['parent'])
-        serializer.save(owner=self.request.user, is_public=True, parent_id=parent_id)'''
-
-
 class CommentView(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    pagination_class = LargeResultsSetPagination
 
     def perform_create(self, serializer):
         parent_id = int(self.request.data['parent'])
@@ -173,17 +139,10 @@ class CommentView(viewsets.ModelViewSet):
         serializer.save(parent=comment.parent, is_public=True)
 
 
-"""
-class ListUpdateDeleteTweetView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Tweet.objects.all()
-    serializer_class = TweetSerializer
-"""
-
-
 class CreateDeleteLikeView(viewsets.ModelViewSet):
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
-
+    pagination_class = LargeResultsSetPagination
     def perform_create(self, serializer):
         queryset = self.filter_queryset(self.get_queryset())
         subset = queryset.filter(Q(author_id=self.request.data['author']) & Q(
