@@ -8,6 +8,7 @@ from rest_framework.authtoken.models import Token
 
 class Tweet(models.Model):
     text = models.CharField(max_length=128, null=False, blank=False)
+    image = models.ImageField(upload_to='images',null=True)
     owner = models.ForeignKey(User,
                               related_name='tweets',
                               on_delete=models.CASCADE)

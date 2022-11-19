@@ -1,4 +1,3 @@
-
 from .models import Like, Tweet, Comment
 from .serializers import *
 from .serializers import UserSerializer
@@ -60,6 +59,7 @@ class ListCreateTweetView(viewsets.ModelViewSet):
     queryset = Tweet.objects.all()
     serializer_class = TweetSerializer
     pagination_class = LargeResultsSetPagination
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         print("it's work")
@@ -123,6 +123,7 @@ class CommentView(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     pagination_class = LargeResultsSetPagination
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         parent_id = int(self.request.data['parent'])
@@ -143,6 +144,7 @@ class CreateDeleteLikeView(viewsets.ModelViewSet):
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
     pagination_class = LargeResultsSetPagination
+    permission_classes = [IsAuthenticated]
     def perform_create(self, serializer):
         queryset = self.filter_queryset(self.get_queryset())
         subset = queryset.filter(Q(author_id=self.request.data['author']) & Q(

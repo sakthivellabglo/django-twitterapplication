@@ -31,7 +31,7 @@ class TweetSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Tweet
-        fields = ('id', 'text', 'owner', 'is_public', 'likes_count', 'comments_count', 'comments', 'created_at',
+        fields = ('id','image', 'text', 'owner', 'is_public', 'likes_count', 'comments_count', 'comments', 'created_at',
                   'modified_at')
         read_only_fields = ('created_at', 'modified_at')
 
