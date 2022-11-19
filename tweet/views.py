@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import Like, Tweet, Comment
 from rest_framework import generics
-from .serializers import CommentSerializer, LikeSerializer, TweetSerializer
+from .serializers import *
 from django.contrib.auth.models import User
 from .serializers import UserSerializer
 from rest_framework .pagination import PageNumberPagination
@@ -10,12 +10,38 @@ from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import authenticate, login
 
 
 class LargeResultsSetPagination(PageNumberPagination):
     page_size = 1
     page_size_query_param = 'page_size'
     max_page_size = 100
+
+class Register(viewsets.ModelViewSet):
+
+    queryset = User.objects.all()
+    serializer_class = CreateuserSerializers
+
+class LoginView(generics.GenericAPIView):
+    serializer_class = Loginserializer
+    def post(self, request):
+
+        username = request.data.get("username")
+        password = request.data.get("password")
+        if username is None or password is None:
+            return Response({'error': 'Please provide both username and password'})
+        user = authenticate(username=username, password=password)
+
+        if not user:
+            return Response({'error': 'Invalid Credentials'})
+        login(request, user)
+        token, li = Token.objects.get_or_create(user=user)
+
+        return Response({'token': token.key})
 
 
 class UserView(viewsets.ModelViewSet):
@@ -66,6 +92,11 @@ class ListPublicTweetsView(viewsets.ModelViewSet):
     queryset = Tweet.objects.filter(is_public=True)
     serializer_class = TweetSerializer
     pagination_class = LargeResultsSetPagination
+
+    def perform_create(self, serializer):
+        print("it's work")
+        serializer.save(owner=self.request.user)
+
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

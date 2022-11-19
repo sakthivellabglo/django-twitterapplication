@@ -7,10 +7,12 @@ from rest_framework .routers import DefaultRouter
 router = DefaultRouter()
 
 router.register('publictweetlist', ListPublicTweetsView,basename='public-list')
-router.register('users', UserView,basename='users-list')
+router.register('users', UserView)
 router.register('tweet', ListCreateTweetView)
 router.register('comment', CommentView)
 router.register('like', CreateDeleteLikeView)
+router.register('register', Register)
+#router.register('login', LoginView)
 app_name = 'api'
 urlpatterns = [
     #path('tweet/', ListCreateTweetView.as_view(), name='create'),
@@ -23,5 +25,5 @@ urlpatterns = [
     #path('userdetails/<int:pk>/',UserDetailsView.as_view()),
     path('',include(router.urls)),
     path('get-token/', obtain_auth_token),
-
+    path('login/', LoginView.as_view(), name = 'login'),
 ]
