@@ -10,24 +10,17 @@ class LikeSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.username')
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'owner', 'is_public', 'likes_count', 'comments_count', 'comments', 'parent',
-                  'created_at', 'modified_at')
+        fields = ('id', 'comment', 'user_tweet', 'user')
+        read_only_fields = ('id','user',)
 
-    def get_fields(self):
-        fields = super(CommentSerializer, self).get_fields()
-        fields['comments'] = CommentSerializer(many=True, read_only=True)
-
-        return fields
 
 
 class TweetSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     comments = CommentSerializer(many=True, read_only=True)
-
 
     class Meta:
         model = Tweet

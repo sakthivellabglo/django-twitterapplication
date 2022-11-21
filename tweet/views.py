@@ -1,18 +1,20 @@
 from .models import Like, Tweet, Comment
-from .serializers import *
+from .serializers import ( 
+      CommentSerializer,
+      CreateuserSerializers,
+      LikeSerializer, 
+      Loginserializer, 
+      TweetSerializer
+)  
 from .serializers import UserSerializer
 
 from rest_framework import generics
 from rest_framework .pagination import PageNumberPagination
-from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -34,7 +36,6 @@ class LoginView(generics.GenericAPIView):
     serializer_class = Loginserializer
 
     def post(self, request):
-
         username = request.data.get("username")
         password = request.data.get("password")
         if username is None or password is None:
@@ -45,7 +46,6 @@ class LoginView(generics.GenericAPIView):
             return Response({'error': 'Invalid Credentials'})
         login(request, user)
         token, li = Token.objects.get_or_create(user=user)
-
         return Response({'token': token.key})
 
 
@@ -75,7 +75,7 @@ class ListCreateTweetView(viewsets.ModelViewSet):
             likes_count = Like.objects.filter(tweet=tweet_id).count()
 
             tweet.likes_count = likes_count
-            tweet.comments_count = tweet.comments.all().count()
+            tweet.comments_count = Comment.objects.filter(user_tweet=tweet_id).count()
             tweet.save()
 
         page = self.paginate_queryset(queryset)
@@ -106,7 +106,7 @@ class ListPublicTweetsView(viewsets.ModelViewSet):
             tweet_id = tweet.id
             likes_count = Like.objects.filter(tweet=tweet_id).count()
             tweet.likes_count = likes_count
-            tweet.comments_count = tweet.comments.all().count()
+            tweet.comments_count = Comment.objects.filter(user_tweet=tweet_id).count()
             tweet.save()
 
         page = self.paginate_queryset(queryset)
@@ -125,19 +125,19 @@ class CommentView(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     permission_classes = [IsAuthenticated]
 
+
     def perform_create(self, serializer):
-        parent_id = int(self.request.data['parent'])
-        serializer.save(owner=self.request.user,
-                        is_public=True, parent_id=parent_id)
+        parent_id = int(self.request.data['user_tweet'])
+        tweets = Tweet.objects.filter(id=parent_id, is_public=True)
+        serializer.save(user_tweet_id=parent_id,user =self.request.user)
 
     def perform_update(self, serializer):
         comment_id = int(self.kwargs.get('pk'))
-
         queryset = self.filter_queryset(self.queryset)
         queryset = queryset.filter(
-            Q(id=comment_id) & Q(owner=self.request.user))
+            Q(id=comment_id) & Q(user=self.request.user))
         comment = queryset.get()
-        serializer.save(parent=comment.parent, is_public=True)
+        serializer.save(user_tweet=comment.user_tweet,user =self.request.user)
 
 
 class CreateDeleteLikeView(viewsets.ModelViewSet):

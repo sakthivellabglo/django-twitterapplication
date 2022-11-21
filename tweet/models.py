@@ -2,7 +2,6 @@ from django.db import models
 from django.db import models
 
 from django.contrib.auth.models import User
-from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 
@@ -34,9 +33,13 @@ class Like(models.Model):
         return self.tweet.text
 
 
-class Comment(Tweet):
-    parent = models.ForeignKey(Tweet,
+class Comment(models.Model):
+    comment = models.CharField(max_length=128, null=True)
+    user_tweet = models.ForeignKey(Tweet,null=True,
                                related_name='comments',
+                               on_delete=models.CASCADE)
+    user = models.ForeignKey(User,null=True,
+                               related_name='user',
                                on_delete=models.CASCADE)
 
     def __str__(self):

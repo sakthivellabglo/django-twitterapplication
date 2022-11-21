@@ -74,9 +74,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 1,
+    )
 }
 
 WSGI_APPLICATION = 'twitter.wsgi.application'
@@ -88,9 +86,15 @@ WSGI_APPLICATION = 'twitter.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'django',
+        'HOST' : 'localhost',
+        'PORT' : '3306',
+        'USER' : 'root',
+        'PASSWORD' : 'password'
     }
+    
+    
 }
 
 # Password validation
