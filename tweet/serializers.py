@@ -14,8 +14,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'comment', 'user_tweet', 'user')
-        read_only_fields = ('id','user',)
-
+        read_only_fields = ('id', 'user',)
 
 
 class TweetSerializer(serializers.HyperlinkedModelSerializer):
@@ -24,7 +23,7 @@ class TweetSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Tweet
-        fields = ('id','image', 'text', 'owner', 'is_public', 'likes_count', 'comments_count', 'comments', 'created_at',
+        fields = ('id', 'image', 'text', 'owner', 'is_public', 'likes_count', 'comments_count', 'comments', 'created_at',
                   'modified_at')
         read_only_fields = ('created_at', 'modified_at')
 
@@ -39,11 +38,13 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'tweets')
 
+
 class CreateuserSerializers(serializers.ModelSerializer):
- 
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'email', 'first_name', 'last_name')
+        fields = ('id', 'username', 'password',
+                  'email', 'first_name', 'last_name')
         write_only_fields = ('password',)
         read_only_fields = ('id',)
 
@@ -58,6 +59,7 @@ class CreateuserSerializers(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
 
 class Loginserializer(serializers.ModelSerializer):
     class Meta:

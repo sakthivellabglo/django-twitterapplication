@@ -1,11 +1,11 @@
 from .models import Like, Tweet, Comment
-from .serializers import ( 
-      CommentSerializer,
-      CreateuserSerializers,
-      LikeSerializer, 
-      Loginserializer, 
-      TweetSerializer
-)  
+from .serializers import (
+    CommentSerializer,
+    CreateuserSerializers,
+    LikeSerializer,
+    Loginserializer,
+    TweetSerializer
+)
 from .serializers import UserSerializer
 
 from rest_framework import generics
@@ -75,7 +75,8 @@ class ListCreateTweetView(viewsets.ModelViewSet):
             likes_count = Like.objects.filter(tweet=tweet_id).count()
 
             tweet.likes_count = likes_count
-            tweet.comments_count = Comment.objects.filter(user_tweet=tweet_id).count()
+            tweet.comments_count = Comment.objects.filter(
+                user_tweet=tweet_id).count()
             tweet.save()
 
         page = self.paginate_queryset(queryset)
@@ -106,7 +107,8 @@ class ListPublicTweetsView(viewsets.ModelViewSet):
             tweet_id = tweet.id
             likes_count = Like.objects.filter(tweet=tweet_id).count()
             tweet.likes_count = likes_count
-            tweet.comments_count = Comment.objects.filter(user_tweet=tweet_id).count()
+            tweet.comments_count = Comment.objects.filter(
+                user_tweet=tweet_id).count()
             tweet.save()
 
         page = self.paginate_queryset(queryset)
@@ -125,11 +127,10 @@ class CommentView(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     permission_classes = [IsAuthenticated]
 
-
     def perform_create(self, serializer):
         parent_id = int(self.request.data['user_tweet'])
         tweets = Tweet.objects.filter(id=parent_id, is_public=True)
-        serializer.save(user_tweet_id=parent_id,user =self.request.user)
+        serializer.save(user_tweet_id=parent_id, user=self.request.user)
 
     def perform_update(self, serializer):
         comment_id = int(self.kwargs.get('pk'))
@@ -137,7 +138,7 @@ class CommentView(viewsets.ModelViewSet):
         queryset = queryset.filter(
             Q(id=comment_id) & Q(user=self.request.user))
         comment = queryset.get()
-        serializer.save(user_tweet=comment.user_tweet,user =self.request.user)
+        serializer.save(user_tweet=comment.user_tweet, user=self.request.user)
 
 
 class CreateDeleteLikeView(viewsets.ModelViewSet):
@@ -145,6 +146,7 @@ class CreateDeleteLikeView(viewsets.ModelViewSet):
     serializer_class = LikeSerializer
     pagination_class = LargeResultsSetPagination
     permission_classes = [IsAuthenticated]
+
     def perform_create(self, serializer):
         queryset = self.filter_queryset(self.get_queryset())
         subset = queryset.filter(Q(author_id=self.request.data['author']) & Q(

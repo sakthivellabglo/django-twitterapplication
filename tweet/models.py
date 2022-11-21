@@ -7,15 +7,17 @@ from rest_framework.authtoken.models import Token
 
 class Tweet(models.Model):
     text = models.CharField(max_length=128, null=False, blank=False)
-    image = models.ImageField(upload_to='images',null=True)
+    image = models.ImageField(upload_to='images', null=True)
     owner = models.ForeignKey(User,
                               related_name='tweets',
                               on_delete=models.CASCADE)
     is_public = models.BooleanField(default=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     modified_at = models.DateTimeField(auto_now=True, editable=False)
-    likes_count = models.IntegerField(default=0, null=False, blank=False, editable=False)
-    comments_count = models.IntegerField(default=0, null=False, blank=False, editable=False)
+    likes_count = models.IntegerField(
+        default=0, null=False, blank=False, editable=False)
+    comments_count = models.IntegerField(
+        default=0, null=False, blank=False, editable=False)
 
     def __str__(self):
         return self.text
@@ -35,16 +37,15 @@ class Like(models.Model):
 
 class Comment(models.Model):
     comment = models.CharField(max_length=128, null=True)
-    user_tweet = models.ForeignKey(Tweet,null=True,
-                               related_name='comments',
-                               on_delete=models.CASCADE)
-    user = models.ForeignKey(User,null=True,
-                               related_name='user',
-                               on_delete=models.CASCADE)
+    user_tweet = models.ForeignKey(Tweet, null=True,
+                                   related_name='comments',
+                                   on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=True,
+                             related_name='user',
+                             on_delete=models.CASCADE)
 
     def __str__(self):
         return self.text
-
 
 
 def create_auth_token(sender, instance=None, created=False, **kwargs):
