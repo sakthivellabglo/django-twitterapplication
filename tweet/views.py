@@ -149,8 +149,7 @@ class CreateDeleteLikeView(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         queryset = self.filter_queryset(self.get_queryset())
-        subset = queryset.filter(Q(author_id=self.request.data['author']) & Q(
-            tweet_id=self.request.data['tweet']))
+        subset = queryset.filter(Q(author_id=self.request.data['author']) & Q(tweet_id=self.request.data['tweet']))
         if subset.count() > 0:
             subset.first().delete()
             return
