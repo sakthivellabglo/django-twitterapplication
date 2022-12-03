@@ -1,9 +1,16 @@
 from django.db import models
-from django.db import models
+
 
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from django.utils import timezone
 
+class BaseModel(models.Model):
+   created = models.DateTimeField(default=timezone.now)
+   updated = models.DateTimeField(auto_now=True)
+ 
+   class Meta:
+       abstract = True
 
 class Tweet(models.Model):
     text = models.CharField(max_length=128, null=False, blank=False)
@@ -23,7 +30,7 @@ class Tweet(models.Model):
         return self.text
 
 
-class Like(models.Model):
+class Like(BaseModel):
     tweet = models.ForeignKey(Tweet,
                               related_name='like',
                               on_delete=models.CASCADE)
@@ -51,4 +58,7 @@ class Comment(models.Model):
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+
+ 
+
 # Create your models here.

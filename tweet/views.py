@@ -4,11 +4,13 @@ from .serializers import (
     CreateuserSerializers,
     LikeSerializer,
     Loginserializer,
-    TweetSerializer
+    TweetSerializer,
+    Like_Count_Serializer
 )
 from .serializers import UserSerializer
 
 from rest_framework import generics
+
 from rest_framework .pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import viewsets
@@ -18,7 +20,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate, login
 from django.db.models import Q
 from django.contrib.auth.models import User
-
+from rest_framework.decorators import action
 
 class LargeResultsSetPagination(PageNumberPagination):
     page_size = 5
@@ -149,8 +151,20 @@ class CreateDeleteLikeView(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         queryset = self.filter_queryset(self.get_queryset())
-        subset = queryset.filter(Q(author_id=self.request.data['author']) & Q(tweet_id=self.request.data['tweet']))
+        subset = queryset.filter(Q(author_id=self.request.user.id) & Q(tweet_id=self.request.data['tweet']))
         if subset.count() > 0:
             subset.first().delete()
             return
-        serializer.save()
+        serializer.save(author = self.request.user)
+
+    @action(detail=False, methods=['GET'])
+    def counting_like(self, request, **kwargs):
+        qs = self.get_queryset()
+        days = set()
+        for date in qs:
+            days.add(date.created.date())
+        data = []
+        for date in days:
+            count = Like.objects.filter(created__icontains = date, tweet__owner = self.request.user).count()
+            data.append({'date':date, 'like_count':count})
+        return Response(data)
