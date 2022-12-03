@@ -9,6 +9,7 @@ from .serializers import (
 )
 from .serializers import UserSerializer
 
+from rest_framework.decorators import action
 from rest_framework import generics
 
 from rest_framework .pagination import PageNumberPagination
@@ -20,7 +21,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate, login
 from django.db.models import Q
 from django.contrib.auth.models import User
-from rest_framework.decorators import action
+
 
 class LargeResultsSetPagination(PageNumberPagination):
     page_size = 5
@@ -141,6 +142,22 @@ class CommentView(viewsets.ModelViewSet):
             Q(id=comment_id) & Q(user=self.request.user))
         comment = queryset.get()
         serializer.save(user_tweet=comment.user_tweet, user=self.request.user)
+
+    @action(detail=False, methods=['get'], url_path='sales')
+    def commentscount(self, request, *args, **kwargs):
+       comments = Comment.objects.all()
+       days = []
+       for comments in comments:
+           days.append(comments.created.date())
+       days = list(set(days))
+       days.sort()
+       data = []
+       for day in days:
+           data.append({
+               'day': day,
+               'count': Comment.objects.filter(created__icontains=day).count()
+           })
+       return Response(data)
 
 
 class CreateDeleteLikeView(viewsets.ModelViewSet):
