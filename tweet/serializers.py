@@ -7,6 +7,7 @@ class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
         fields = ('id', 'author', 'tweet')
+        read_only_fields = ('author' ,)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -65,3 +66,9 @@ class Loginserializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'password']
+
+class Like_Count_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ('id', 'author', 'tweet', 'created')
+        read_only_fields = ('author' ,'created')
